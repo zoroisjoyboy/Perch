@@ -1,0 +1,11 @@
+C:\Users\allen\OneDrive\Desktop\projects\Rust\game\perch\target\debug\deps\libslotmap-1a6e1a75d8e0d570.rmeta: C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\slotmap-1.0.7\src\lib.rs C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\slotmap-1.0.7\src\basic.rs C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\slotmap-1.0.7\src\dense.rs C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\slotmap-1.0.7\src\hop.rs C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\slotmap-1.0.7\src\secondary.rs C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\slotmap-1.0.7\src\sparse_secondary.rs C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\slotmap-1.0.7\src\util.rs
+
+C:\Users\allen\OneDrive\Desktop\projects\Rust\game\perch\target\debug\deps\slotmap-1a6e1a75d8e0d570.d: C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\slotmap-1.0.7\src\lib.rs C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\slotmap-1.0.7\src\basic.rs C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\slotmap-1.0.7\src\dense.rs C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\slotmap-1.0.7\src\hop.rs C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\slotmap-1.0.7\src\secondary.rs C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\slotmap-1.0.7\src\sparse_secondary.rs C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\slotmap-1.0.7\src\util.rs
+
+C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\slotmap-1.0.7\src\lib.rs:
+C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\slotmap-1.0.7\src\basic.rs:
+C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\slotmap-1.0.7\src\dense.rs:
+C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\slotmap-1.0.7\src\hop.rs:
+C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\slotmap-1.0.7\src\secondary.rs:
+C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\slotmap-1.0.7\src\sparse_secondary.rs:
+C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\slotmap-1.0.7\src\util.rs:

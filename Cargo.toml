@@ -1,0 +1,23 @@
+[package]
+name = "perch"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "main"
+path = "src/main.rs"
+
+[[bin]]
+name = "ship"
+path = "src/ship.rs"
+
+[lib]
+name = "grid"
+path = "src/grid.rs"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rand = "0.8.5"
+macroquad = "0.4.4"
+futures = "0.3.30"
