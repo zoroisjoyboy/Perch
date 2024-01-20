@@ -36,7 +36,8 @@ pub mod grid {
                 heal_gen: 0.05,
             }
         }
-    
+        
+        // 1.20.24 -> fixed position ship. one move up removes last row regenerates new row 
         pub fn display_grid(&mut self) {
             for i in 0..self.grid.len() {
                 for (&index, value) in &self.generate_row() {

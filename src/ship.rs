@@ -5,27 +5,49 @@ use macroquad::prelude::*;
 #[derive(Debug)]
 struct UserPlane {
     name: String,
+    x: i32,
+    y: i32,
     health: i32,
-    speed: i32,
+    walk: i32,
     boost: bool,
     ammo: i32,
 }
 
 impl UserPlane {
 
-    pub fn new() -> Self {
+    pub fn new(x: i32, y: i32) -> Self {
         UserPlane {
-            name: "MyPlane".to_string(),
+            name: "GoMerry".to_string(),
+            x,
+            y,
             health: 100,
-            speed: 50,
+            walk: 1,
             boost: false,
             ammo: 50,
         }
     }    
 
-    // fn name_plane(&mut self, name: String) {
-    //     self.name = name;       
-    // }
+    fn name_plane(&mut self, name: String) {
+        self.name = name;       
+    }
+
+    fn left_move(&mut self) {
+        if is_key_pressed(KeyCode::Left) {
+            self.x -= 1;
+            if self.x < 0 {
+                self.x = 0;
+            }
+        }
+    }
+
+    fn right_move(&mut self, max_y: i32) {
+        if is_key_pressed(KeyCode::Right) {
+            self.x += 1;
+            if self.x > max_y {
+                self.x = max_y;
+            }
+        }
+    }
 
     fn ammo(&mut self) {
         if is_key_pressed(KeyCode::Space) {
@@ -34,14 +56,6 @@ impl UserPlane {
                 self.ammo = 0; 
             }
         }
-    }
-
-    fn speed(&mut self) {
-        if is_key_down(KeyCode::Up) {
-            self.speed = 70; 
-        } else if is_key_released(KeyCode::Up) {
-            self.speed = 50;
-        } 
     }
 
     fn boost(&mut self) {
@@ -56,22 +70,5 @@ impl UserPlane {
 
 #[macroquad::main("InstrumentPanel")]
 async fn main() {
-    
-    let mut plane = UserPlane::new();
 
-    loop {
-        request_new_screen_size(640.0, 360.0);
-        clear_background(BLACK); 
-        plane.ammo();
-        plane.speed();
-        plane.boost();
-        draw_text(&plane.name, 50.0, 50.0, 20.0, WHITE);
-        draw_text(&plane.health.to_string(), 50.0, 70.0, 20.0, WHITE);
-        draw_text(&plane.speed.to_string(), 50.0, 90.0, 20.0, WHITE);
-        draw_text(&plane.boost.to_string(), 50.0,110.0, 20.0, WHITE);
-        draw_text(&plane.ammo.to_string(), 50.0, 130.0, 20.0, WHITE);
-        
-
-        next_frame().await
-    }
 }
