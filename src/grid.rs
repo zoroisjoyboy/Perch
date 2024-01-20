@@ -10,8 +10,8 @@ pub mod grid {
 
     #[derive(Debug)]
     pub struct Grid {
-        x: usize,
-        y: usize,
+        pub x: usize,
+        pub y: usize,
         pub grid: Vec<Vec<i32>>, 
         obstacle_row: Vec<bool>,
         boost_row: Vec<bool>,
@@ -133,34 +133,3 @@ pub mod grid {
     }
 
 }
-
-// #[macroquad::main("Matrix Display")]
-// async fn main() {
-
-    // fn window_size(&self, columns: usize, rows: usize) -> (f32, f32) {
-    //     let width = columns as f32 * (self.cell_size + self.padding) + self.padding;
-    //     let height = rows as f32 * (self.cell_size + self.padding) + self.padding;
-    //     (width, height)
-    // }
-//     // let (width, height) = self.window_size(self.y, self.x);
-
-//     // loop {
-//     //     clear_background(BEIGE);
-//     //     request_new_screen_size(width, height);
-
-//     //     for (i, row) in self.grid.iter().enumerate() {
-//     //         for (j, &value) in row.iter().enumerate() {
-//     //             let x = j as f32 * (self.cell_size + self.padding) + self.padding;
-//     //             let y = i as f32 * (self.cell_size + self.padding) + self.padding;
-                
-//     //             match value {
-//     //                 1 => draw_rectangle(x, y, self.cell_size, self.cell_size, BLACK),
-//     //                 _ => draw_rectangle(x, y, self.cell_size, self.cell_size, BEIGE),
-//     //             }
-//     //         }
-//     //     }
-//     // }
-//     // next_frame().await;
-// }
-
-// move macrosquad to main.rs 
