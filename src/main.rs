@@ -2,7 +2,7 @@
 use macroquad::prelude::*;
 use std::time::Duration;
 use std::thread;
-mod grid;
+use lib::{grid, ship};
 
 const CELL_SIZE: f32 = 20.;
 const PADDING: f32 = 2.;
@@ -15,7 +15,7 @@ fn window_size(columns: usize, rows: usize) -> (f32, f32) {
 
 #[macroquad::main("Matrix Display")]
 async fn main() {
-    let mut g = grid::grid::Grid::new(50, 70);
+    let mut g = lib::grid::Grid::new(50, 70);
     let (width, height) = window_size(g.y, g.x);
 
     loop {
