@@ -8,15 +8,16 @@ const CELL_SIZE: f32 = 20.;
 const PADDING: f32 = 2.;
 
 fn window_size(columns: usize, rows: usize) -> (f32, f32) {
-    let width = columns as f32 * (CELL_SIZE + PADDING) + PADDING;
-    let height = rows as f32 * (CELL_SIZE + PADDING) + PADDING;
+    let width = rows as f32 * (CELL_SIZE + PADDING) + PADDING;
+    let height = columns as f32 * (CELL_SIZE + PADDING) + PADDING;
     (width, height)
 }
 
 #[macroquad::main("Matrix Display")]
 async fn main() {
-    let mut g = lib::grid::Grid::new(50, 70);
+    let mut g = lib::grid::Grid::new(30, 15);
     let (width, height) = window_size(g.y, g.x);
+    let mut s = lib::ship::Ship::new(((width / 2.0 - CELL_SIZE) - PADDING + 1.0) as usize, ((height - CELL_SIZE) - PADDING) as usize); 
 
     loop {
         clear_background(BEIGE);
@@ -38,6 +39,8 @@ async fn main() {
                 }
             }
         }
+        draw_rectangle(s.x as f32, s.y as f32, CELL_SIZE, CELL_SIZE, WHITE);
+        s.forward(height as usize, CELL_SIZE as usize, PADDING as usize);
         let sleep_duration = Duration::from_millis(100);
         thread::sleep(sleep_duration);
         next_frame().await;

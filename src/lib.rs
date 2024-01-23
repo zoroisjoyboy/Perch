@@ -140,23 +140,25 @@ pub mod ship {
     use macroquad::prelude::*;
 
     #[derive(Debug)]
-    struct UserPlane {
+    pub struct Ship {
         name: String,
-        x: i32,
-        y: i32,
+        pub x: usize,
+        pub y: usize,
+        forward_move: i32,
         health: i32,
         walk: i32,
         boost: bool,
         ammo: i32,
     }
 
-    impl UserPlane {
+    impl Ship {
 
-        pub fn new(x: i32, y: i32) -> Self {
-            UserPlane {
+        pub fn new(x: usize, y: usize) -> Self {
+            Ship {
                 name: "GoMerry".to_string(),
                 x,
                 y,
+                forward_move: 0,
                 health: 100,
                 walk: 1,
                 boost: false,
@@ -164,20 +166,31 @@ pub mod ship {
             }
         }    
 
-        fn name_plane(&mut self, name: String) {
+        pub fn name_plane(&mut self, name: String) {
             self.name = name;       
         }
 
-        fn left_move(&mut self) {
+        pub fn forward(&mut self, height: usize, cell_size: usize, padding: usize) {
+            if is_key_pressed(KeyCode::Up) {
+                if self.y < cell_size + padding {
+                    self.y = height - cell_size - padding;
+                } else {
+                    self.y -= cell_size + padding;
+                }
+                println!("{}", self.y);
+            } 
+        }
+
+        pub fn left_move(&mut self) {
             if is_key_pressed(KeyCode::Left) {
                 self.x -= 1;
-                if self.x < 0 {
+                if self.x <= 0 {
                     self.x = 0;
                 }
             }
         }
 
-        fn right_move(&mut self, max_x: i32) {
+        pub fn right_move(&mut self, max_x: usize) {
             if is_key_pressed(KeyCode::Right) {
                 self.x += 1;
                 if self.x > max_x {
@@ -186,7 +199,7 @@ pub mod ship {
             }
         }
 
-        fn ammo(&mut self) {
+        pub fn ammo(&mut self) {
             if is_key_pressed(KeyCode::Space) {
                 self.ammo -= 1;
                 if self.ammo <= 0 {
@@ -195,7 +208,7 @@ pub mod ship {
             }
         }
 
-        fn boost(&mut self, state: i32, count: i32) {
+        pub fn boost(&mut self, state: i32, count: i32) {
             if state == 3 {
                 self.boost = true;
             } else if count > 2 {
