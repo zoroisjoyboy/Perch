@@ -43,15 +43,15 @@ pub mod grid {
             }
         }
 
-        pub fn remove_bottom_row(&mut self) {
-            self.grid.pop();
-        }
-        
         pub fn regenerate_top_row(&mut self) {
-            let top_row = self.generate_row();
-            for (&index, value) in &top_row {
-                self.grid[0][index] = *value;
+            let new_chunk_elements = self.generate_row();
+            let mut new_top_row: Vec<i32> = vec![0, self.x as i32];  
+            for (&index, value) in &new_chunk_elements {
+                new_top_row[index] = *value; 
+                println!("{} : {}", index, *value);
             }
+            self.grid.insert(0, new_top_row);
+            self.grid.pop();
         }
 
         fn generate_obstacles_row(&mut self) {
@@ -152,6 +152,7 @@ pub mod ship {
         name: String,
         pub x: usize,
         pub y: usize,
+        pub forward: bool,
         health: i32,
         walk: i32,
         boost: bool,
@@ -165,6 +166,7 @@ pub mod ship {
                 name: "GoMerry".to_string(),
                 x,
                 y,
+                forward: false,
                 health: 100,
                 walk: 1,
                 boost: false,
@@ -176,14 +178,8 @@ pub mod ship {
             self.name = name;       
         }
 
-        pub fn forward(&mut self, height: usize, cell_size: usize, padding: usize) {
-            if is_key_down(KeyCode::Up) {
-                if self.y < cell_size + padding {
-                    self.y = height - cell_size - padding;
-                } else {
-                    self.y -= cell_size + padding;
-                }
-            } 
+        pub fn forward(&mut self, cell_size: usize, padding: usize) {
+            self.y -= cell_size + padding;
         }
 
         pub fn left_move(&mut self, cell_size: usize, padding: usize) {
@@ -203,7 +199,6 @@ pub mod ship {
                 } else {
                     self.x += cell_size + padding;
                 }
-                println!("{}", self.x);
             }
         }
 
