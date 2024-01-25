@@ -41,6 +41,8 @@ async fn main() {
         }
         draw_rectangle(s.x as f32, s.y as f32, CELL_SIZE, CELL_SIZE, WHITE);
         s.forward(height as usize, CELL_SIZE as usize, PADDING as usize);
+        s.left_move(CELL_SIZE as usize, PADDING as usize);
+        s.right_move(width as usize, CELL_SIZE as usize, PADDING as usize);
         let sleep_duration = Duration::from_millis(100);
         thread::sleep(sleep_duration);
         next_frame().await;

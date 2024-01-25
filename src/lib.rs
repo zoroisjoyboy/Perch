@@ -1,5 +1,3 @@
-/* Grid */
-
 pub mod grid {
 
     use macroquad::prelude::*;
@@ -37,7 +35,6 @@ pub mod grid {
             }
         }
         
-        // 1.20.24 -> fixed position ship. one move up removes last row regenerates new row 
         pub fn display_grid(&mut self) {
             for i in 0..self.grid.len() {
                 for (&index, value) in &self.generate_row() {
@@ -45,7 +42,18 @@ pub mod grid {
                 }
             }
         }
+
+        pub fn remove_bottom_row(&mut self) {
+            self.grid.pop();
+        }
         
+        pub fn regenerate_top_row(&mut self) {
+            let top_row = self.generate_row();
+            for (&index, value) in &top_row {
+                self.grid[0][index] = *value;
+            }
+        }
+
         fn generate_obstacles_row(&mut self) {
             let row = &mut self.obstacle_row; 
             let chunk_generated = rand_chunk_generate(row, self.obstacle_gen); 
@@ -144,7 +152,6 @@ pub mod ship {
         name: String,
         pub x: usize,
         pub y: usize,
-        forward_move: i32,
         health: i32,
         walk: i32,
         boost: bool,
@@ -158,7 +165,6 @@ pub mod ship {
                 name: "GoMerry".to_string(),
                 x,
                 y,
-                forward_move: 0,
                 health: 100,
                 walk: 1,
                 boost: false,
@@ -171,31 +177,33 @@ pub mod ship {
         }
 
         pub fn forward(&mut self, height: usize, cell_size: usize, padding: usize) {
-            if is_key_pressed(KeyCode::Up) {
+            if is_key_down(KeyCode::Up) {
                 if self.y < cell_size + padding {
                     self.y = height - cell_size - padding;
                 } else {
                     self.y -= cell_size + padding;
                 }
-                println!("{}", self.y);
             } 
         }
 
-        pub fn left_move(&mut self) {
-            if is_key_pressed(KeyCode::Left) {
-                self.x -= 1;
-                if self.x <= 0 {
-                    self.x = 0;
+        pub fn left_move(&mut self, cell_size: usize, padding: usize) {
+            if is_key_down(KeyCode::Left) {
+                if self.x < cell_size + padding {
+                    self.x = 2;
+                } else {
+                    self.x -= cell_size + padding;
                 }
             }
         }
 
-        pub fn right_move(&mut self, max_x: usize) {
-            if is_key_pressed(KeyCode::Right) {
-                self.x += 1;
-                if self.x > max_x {
-                    self.x = max_x;
+        pub fn right_move(&mut self, width: usize, cell_size: usize, padding: usize) {
+            if is_key_down(KeyCode::Right) {
+                if self.x >= (width - cell_size) - padding {
+                    self.x = (width - cell_size) - padding;
+                } else {
+                    self.x += cell_size + padding;
                 }
+                println!("{}", self.x);
             }
         }
 
