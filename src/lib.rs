@@ -45,7 +45,8 @@ pub mod grid {
 
         pub fn regenerate_top_row(&mut self) {
             let new_chunk_elements = self.generate_row();
-            let mut new_top_row: Vec<i32> = vec![0, self.x as i32];  
+            let mut new_top_row: Vec<i32> = vec![0; self.x + 1];
+              
             for (&index, value) in &new_chunk_elements {
                 new_top_row[index] = *value; 
                 println!("{} : {}", index, *value);
@@ -153,7 +154,7 @@ pub mod ship {
         pub x: usize,
         pub y: usize,
         pub forward: bool,
-        health: i32,
+        pub health: i32,
         walk: i32,
         boost: bool,
         ammo: i32,
@@ -183,7 +184,7 @@ pub mod ship {
         }
 
         pub fn left_move(&mut self, cell_size: usize, padding: usize) {
-            if is_key_down(KeyCode::Left) {
+            if is_key_pressed(KeyCode::Left) {
                 if self.x < cell_size + padding {
                     self.x = 2;
                 } else {
@@ -193,7 +194,7 @@ pub mod ship {
         }
 
         pub fn right_move(&mut self, width: usize, cell_size: usize, padding: usize) {
-            if is_key_down(KeyCode::Right) {
+            if is_key_pressed(KeyCode::Right) {
                 if self.x >= (width - cell_size) - padding {
                     self.x = (width - cell_size) - padding;
                 } else {
@@ -202,13 +203,20 @@ pub mod ship {
             }
         }
 
-        pub fn ammo(&mut self) {
+        pub fn shoot(&mut self) {
             if is_key_pressed(KeyCode::Space) {
                 self.ammo -= 1;
                 if self.ammo <= 0 {
                     self.ammo = 0; 
                 }
             }
+        }
+
+        pub fn health(&mut self, state: i32) {
+            if state == 1 {
+                self.health -= 50;
+            }
+            println!("{}", self.health);
         }
 
         pub fn boost(&mut self, state: i32, count: i32) {

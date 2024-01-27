@@ -13,7 +13,7 @@ fn window_size(columns: usize, rows: usize) -> (f32, f32) {
     (width, height)
 }
 
-#[macroquad::main("Matrix Display")]
+#[macroquad::main("Perch")]
 async fn main() {
     let mut g = lib::grid::Grid::new(30, 15);
     let (width, height) = window_size(g.y, g.x);
@@ -26,7 +26,7 @@ async fn main() {
         request_new_screen_size(width, height);
 
         let g_matrix = &mut g.grid;
-
+        
         for (i, row) in g_matrix.iter().enumerate() {
             for (j, &value) in row.iter().enumerate() {
                 let x = j as f32 * (CELL_SIZE + PADDING) + PADDING;
@@ -43,13 +43,24 @@ async fn main() {
 
         draw_rectangle(s.x as f32, s.y as f32, CELL_SIZE, CELL_SIZE, WHITE);
 
+        // let current_health = g_matrix[s.x][s.y]; 
+
+        // s.health(current_health);
+
+        // if current_health <= 0 {
+        //     break;
+        // }
+
         if is_key_down(KeyCode::Up) {
             g.regenerate_top_row();
-            // s.forward(CELL_SIZE as usize, PADDING as usize);
         }
 
+        s.shoot();
         s.left_move(CELL_SIZE as usize, PADDING as usize);
         s.right_move(width as usize, CELL_SIZE as usize, PADDING as usize);
+
+        let sleep_duration = Duration::from_millis(35);
+        thread::sleep(sleep_duration);
         next_frame().await;
     }
 }
