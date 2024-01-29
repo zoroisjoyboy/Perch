@@ -29,7 +29,7 @@ pub mod grid {
                 obstacle_row: vec![false; x],
                 boost_row: vec![false; x], 
                 heal_row: vec![false; x],
-                obstacle_gen: 0.20,
+                obstacle_gen: 0.03,
                 boost_gen: 0.05,
                 heal_gen: 0.05,
             }
@@ -49,7 +49,6 @@ pub mod grid {
               
             for (&index, value) in &new_chunk_elements {
                 new_top_row[index] = *value; 
-                println!("{} : {}", index, *value);
             }
             self.grid.insert(0, new_top_row);
             self.grid.pop();
@@ -179,9 +178,9 @@ pub mod ship {
             self.name = name;       
         }
 
-        pub fn forward(&mut self, cell_size: usize, padding: usize) {
-            self.y -= cell_size + padding;
-        }
+        // pub fn forward(&mut self, cell_size: usize, padding: usize) {
+        //     self.y -= cell_size + padding;
+        // }
 
         pub fn left_move(&mut self, cell_size: usize, padding: usize) {
             if is_key_pressed(KeyCode::Left) {
@@ -216,7 +215,7 @@ pub mod ship {
             if state == 1 {
                 self.health -= 50;
             }
-            println!("{}", self.health);
+            println!("health: {}", self.health);
         }
 
         pub fn boost(&mut self, state: i32, count: i32) {
