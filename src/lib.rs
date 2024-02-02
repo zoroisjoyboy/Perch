@@ -154,7 +154,6 @@ pub mod ship {
         pub y: usize,
         pub forward: bool,
         pub health: i32,
-        walk: i32,
         boost: bool,
         ammo: i32,
     }
@@ -168,7 +167,7 @@ pub mod ship {
                 y,
                 forward: false,
                 health: 100,
-                walk: 1,
+
                 boost: false,
                 ammo: 50,
             }
@@ -177,10 +176,6 @@ pub mod ship {
         pub fn name_plane(&mut self, name: String) {
             self.name = name;       
         }
-
-        // pub fn forward(&mut self, cell_size: usize, padding: usize) {
-        //     self.y -= cell_size + padding;
-        // }
 
         pub fn left_move(&mut self, cell_size: usize, padding: usize) {
             if is_key_pressed(KeyCode::Left) {
