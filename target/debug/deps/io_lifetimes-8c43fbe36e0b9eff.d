@@ -1,0 +1,10 @@
+C:\Users\allen\OneDrive\Desktop\projects\Rust\game\perch\target\debug\deps\libio_lifetimes-8c43fbe36e0b9eff.rmeta: C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\io-lifetimes-1.0.11\src\lib.rs C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\io-lifetimes-1.0.11\src\portability.rs C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\io-lifetimes-1.0.11\src\traits.rs C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\io-lifetimes-1.0.11\src\example_ffi.rs C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\io-lifetimes-1.0.11\src\raw.rs C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\io-lifetimes-1.0.11\src\views.rs
+
+C:\Users\allen\OneDrive\Desktop\projects\Rust\game\perch\target\debug\deps\io_lifetimes-8c43fbe36e0b9eff.d: C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\io-lifetimes-1.0.11\src\lib.rs C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\io-lifetimes-1.0.11\src\portability.rs C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\io-lifetimes-1.0.11\src\traits.rs C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\io-lifetimes-1.0.11\src\example_ffi.rs C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\io-lifetimes-1.0.11\src\raw.rs C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\io-lifetimes-1.0.11\src\views.rs
+
+C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\io-lifetimes-1.0.11\src\lib.rs:
+C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\io-lifetimes-1.0.11\src\portability.rs:
+C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\io-lifetimes-1.0.11\src\traits.rs:
+C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\io-lifetimes-1.0.11\src\example_ffi.rs:
+C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\io-lifetimes-1.0.11\src\raw.rs:
+C:\Users\allen\.cargo\registry\src\index.crates.io-6f17d22bba15001f\io-lifetimes-1.0.11\src\views.rs:

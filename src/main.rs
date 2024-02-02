@@ -19,11 +19,11 @@ fn window_to_grid(window_x: f32, window_y: f32) -> (usize, usize) {
     (grid_x, grid_y)
 }
 
-fn current_state_of_ship(ship_x: f32, ship_y: f32) {}
+fn current_state_of_ship(grid: &mut lib::grid::Grid, ship_x: f32, ship_y: f32) {}
 
 #[macroquad::main("Perch")]
 async fn main() {
-    let mut grid = lib::grid::Grid::new(30, 15);
+    let mut grid = lib::grid::Grid::new(30, 30);
     let (width, height) = grid_to_window(grid.x, grid.y);
     let mut ship = lib::ship::Ship::new(((width / 2.0 - CELL_SIZE) - PADDING + 1.0) as usize, ((height - CELL_SIZE) - PADDING) as usize);
 
@@ -43,19 +43,19 @@ async fn main() {
         draw_ship(&ship); 
 
         handle_input(width as usize, &mut grid, &mut ship);
-        grid.regenerate_top_row();
 
         let (s_grid_x, s_grid_y) = window_to_grid(ship.x as f32, ship.y as f32);
-        //println!("s.x: {}, s.y: {}, s_grid_x: {}, s_grid_y: {} ", ship.x, ship.y, s_grid_x, s_grid_y);
-        let current_state = grid.grid[s_grid_x][s_grid_y];
+        println!("s.x: {}, s.y: {}, s_grid_x: {}, s_grid_y: {} ", ship.x, ship.y, s_grid_x, s_grid_y);
+
+        let current_state = grid.grid[s_grid_x][s_grid_y]; // this is where right move is breaking.
         println!("{}", current_state);
 
         ship.health(current_state);
         if ship.health <= 0 {
-            break;
+            println!("Poop");
         }
-        
-        sleep_frame().await;
+    
+        next_frame().await;
     }
 }
 
@@ -82,18 +82,11 @@ fn draw_cell(value: i32, x: f32, y: f32) {
         _ => draw_rectangle(x, y, CELL_SIZE, CELL_SIZE, BEIGE),
     }
 }
-//forward grabs current state by frame, too slow and thus breaks 
-fn handle_input(width: usize, grid: &mut lib::grid::Grid, ship: &mut lib::ship::Ship) {
-    // if is_key_pressed(KeyCode::Up) {
-    //     grid.regenerate_top_row();
-    // }
 
+fn handle_input(width: usize, grid: &mut lib::grid::Grid, ship: &mut lib::ship::Ship) {
+    if is_key_pressed(KeyCode::Up) {
+        grid.regenerate_top_row();
+    }
     ship.left_move(CELL_SIZE as usize, PADDING as usize);
     ship.right_move(width, CELL_SIZE as usize, PADDING as usize);
-}
-
-async fn sleep_frame() {
-    let sleep_duration = Duration::from_millis(50);
-    thread::sleep(sleep_duration);
-    next_frame().await;
 }
