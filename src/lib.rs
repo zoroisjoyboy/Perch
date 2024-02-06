@@ -30,8 +30,8 @@ pub mod grid {
                 boost_row: vec![false; x], 
                 heal_row: vec![false; x],
                 obstacle_gen: 0.03,
-                boost_gen: 0.05,
-                heal_gen: 0.05,
+                boost_gen: 0.03,
+                heal_gen: 0.03,
             }
         }
         
@@ -148,14 +148,35 @@ pub mod ship {
     use macroquad::prelude::*;
 
     #[derive(Debug)]
+    pub struct Bullet {
+        pub x: f32,
+        pub y: f32,
+        pub velocity: f32,
+    }
+
+    impl Bullet {
+        pub fn new(x: f32, y: f32, velocity: f32) -> Self {
+            Bullet {
+                x,
+                y,
+                velocity,
+            }
+        } 
+
+        pub fn bullet_fired(&mut self) {
+            self.y -= self.velocity;
+        }         
+    }
+
+    #[derive(Debug)]
     pub struct Ship {
         name: String,
         pub x: usize,
         pub y: usize,
         pub forward: bool,
         pub health: i32,
-        boost: bool,
-        ammo: i32,
+        pub boost: bool,
+        pub ammo: i32,
     }
 
     impl Ship {
@@ -167,7 +188,6 @@ pub mod ship {
                 y,
                 forward: false,
                 health: 100,
-
                 boost: false,
                 ammo: 50,
             }
@@ -178,7 +198,7 @@ pub mod ship {
         }
 
         pub fn left_move(&mut self, cell_size: usize, padding: usize) {
-            if is_key_pressed(KeyCode::Left) {
+            if is_key_down(KeyCode::Left) {
                 if self.x < cell_size + padding {
                     self.x = 2;
                 } else {
@@ -188,7 +208,7 @@ pub mod ship {
         }
 
         pub fn right_move(&mut self, width: usize, cell_size: usize, padding: usize) {
-            if is_key_pressed(KeyCode::Right) {
+            if is_key_down(KeyCode::Right) {
                 if self.x >= (width - cell_size) - padding {
                     self.x = (width - cell_size) - padding;
                 } else {
@@ -198,11 +218,9 @@ pub mod ship {
         }
 
         pub fn shoot(&mut self) {
-            if is_key_pressed(KeyCode::Space) {
-                self.ammo -= 1;
-                if self.ammo <= 0 {
-                    self.ammo = 0; 
-                }
+            self.ammo -= 1;
+            if self.ammo <= 0 {
+                self.ammo = 0; 
             }
         }
 
