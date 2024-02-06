@@ -29,9 +29,9 @@ pub mod grid {
                 obstacle_row: vec![false; x],
                 boost_row: vec![false; x], 
                 heal_row: vec![false; x],
-                obstacle_gen: 0.03,
-                boost_gen: 0.03,
-                heal_gen: 0.03,
+                obstacle_gen: 0.02,
+                boost_gen: 0.02,
+                heal_gen: 0.02,
             }
         }
         
@@ -152,6 +152,7 @@ pub mod ship {
         pub x: f32,
         pub y: f32,
         pub velocity: f32,
+        pub collided: bool
     }
 
     impl Bullet {
@@ -160,6 +161,7 @@ pub mod ship {
                 x,
                 y,
                 velocity,
+                collided: false,
             }
         } 
 

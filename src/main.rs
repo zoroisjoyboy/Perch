@@ -21,65 +21,15 @@ fn window_to_grid(window_x: f32, window_y: f32) -> (usize, usize) {
     (grid_x, grid_y)
 }
 
-fn current_state_of_ship(grid: &mut grid::Grid, ship_x: usize, ship_y: usize) -> i32 {
-    let (s_grid_x, s_grid_y) = window_to_grid(ship_x as f32, ship_y as f32);
-    let current_state = grid.grid[s_grid_y][s_grid_x];
+fn current_state_of_object(grid: &mut grid::Grid, x: usize, y: usize) -> i32 {
+    let (grid_x, grid_y) = window_to_grid(x as f32, y as f32);
+    let current_state = grid.grid[grid_y][grid_x];
     return current_state;
 }
 
-fn set_change_state(grid: &mut grid::Grid, x: usize, y: usize, new_state: i32) {
+fn change_state(grid: &mut grid::Grid, x: usize, y: usize, new_state: i32) {
     let (grid_x, grid_y) = window_to_grid(x as f32, y as f32);
     grid.grid[grid_y][grid_x] = new_state;
-}
-
-#[macroquad::main("Perch")]
-async fn main() {
-    let mut grid = grid::Grid::new(60, 30);
-    let (width, height) = grid_to_window(grid.x, grid.y);
-    let mut ship = ship::Ship::new(((width / 2.0 - CELL_SIZE) - PADDING + 1.0) as usize, ((height - CELL_SIZE) - PADDING) as usize);
-
-    grid.display_grid();
-    if current_state_of_ship(&mut grid, ship.x, ship.y) == 1 {
-        set_change_state(&mut grid, ship.x, ship.y, 0);
-    }
-
-    let mut last_frame_time = Instant::now();
-
-    loop {
-
-        let delta_time = last_frame_time.elapsed();
-        last_frame_time = Instant::now();
-
-        clear_background(BEIGE);
-        request_new_screen_size(width, height);
-
-        draw_grid(&grid);
-        
-        draw_ship(&ship); 
-
-        grid.regenerate_top_row();
-
-        handle_input(width as usize, &mut grid, &mut ship);
-
-        if current_state_of_ship(&mut grid, ship.x, ship.y) == 1 {
-            ship.health -= 50;
-            set_change_state(&mut grid, ship.x, ship.y, 0);
-        }
-
-        if ship.health > 0 {
-            draw_text(&ship.health.to_string(), width - 50.0, 20.0, 35.0, BLACK);
-        } else {
-            draw_text("Dead", width - 70.0, 20.0, 35.0, BLACK);
-        }
-
-        draw_bullet(&mut ship);
-        draw_text(&ship.ammo.to_string(), width - 50.0, 60.0, 35.0, BLACK);
-        
-        let elapsed_frame_time = last_frame_time.elapsed();
-        if elapsed_frame_time < TARGET_FRAME_TIME {std::thread::sleep(TARGET_FRAME_TIME - elapsed_frame_time)};
-
-        next_frame().await;
-    }
 }
 
 fn draw_grid(grid: &grid::Grid) {
@@ -104,19 +54,90 @@ fn draw_ship(ship: &ship::Ship) {
 
 fn draw_panel() {}
 
-fn draw_bullet(ship: &mut ship::Ship) {
+fn draw_bullet(grid: &mut grid::Grid, ship: &mut ship::Ship, bullets: &mut Vec<ship::Bullet>) {
     if is_key_down(KeyCode::Space) {
-        let mut bullet = ship::Bullet::new(ship.x as f32 + CELL_SIZE / 2.0, ship.y as f32, (CELL_SIZE + PADDING) * 2.0);
         ship.shoot();
-        while bullet.y >= 0.0 {
-            draw_circle(bullet.x, bullet.y, PADDING, BLACK);
-            bullet.bullet_fired();
-            println!("bullet.y: {}, bullet.velocity: {}", bullet.y, bullet.velocity);
+        let new_bullet = ship::Bullet::new (
+            ship.x as f32 + CELL_SIZE / 2.0,
+            ship.y as f32,
+            (CELL_SIZE + PADDING) + 2.0,
+        );
+        bullets.push(new_bullet);
+    }
+
+    for bullet in bullets.iter_mut() {
+        bullet.bullet_fired();
+        draw_circle(bullet.x, bullet.y, PADDING, BLACK);
+        println!("bullet.y: {}, bullet.velocity: {}", bullet.y, bullet.velocity);
+        if current_state_of_object(grid, bullet.x as usize, bullet.y as usize) == 1 {
+            change_state(grid, bullet.x as usize, bullet.y as usize, 0);
         }
     }
+
+    bullets.retain(|bullet| bullet.y >= 0.0 && !bullet.collided);
 }
 
+fn restore_health(grid: &mut grid::Grid, ship: &mut ship::Ship) {
+    if current_state_of_object(grid, ship.x, ship.y) == 3 {
+        ship.health += 10; 
+        if ship.health > 90 {
+            ship.health = 100;
+        }
+    }
+
+}
 fn handle_input(width: usize, grid: &mut grid::Grid, ship: &mut ship::Ship) {
     ship.left_move(CELL_SIZE as usize, PADDING as usize);
     ship.right_move(width, CELL_SIZE as usize, PADDING as usize);
+}
+#[macroquad::main("Perch")]
+async fn main() {
+    let mut grid = grid::Grid::new(60, 30);
+    let (width, height) = grid_to_window(grid.x, grid.y);
+    let mut ship = ship::Ship::new(((width / 2.0 - CELL_SIZE) - PADDING + 1.0) as usize, ((height - CELL_SIZE) - PADDING) as usize);
+    let mut bullets = Vec::new();
+
+    grid.display_grid();
+    if current_state_of_object(&mut grid, ship.x, ship.y) == 1 {
+        change_state(&mut grid, ship.x, ship.y, 0);
+    }
+
+    let mut last_frame_time = Instant::now();
+
+    loop {
+
+        let delta_time = last_frame_time.elapsed();
+        last_frame_time = Instant::now();
+
+        clear_background(BEIGE);
+        request_new_screen_size(width, height);
+
+        draw_grid(&grid);
+        
+        draw_ship(&ship); 
+
+        grid.regenerate_top_row();
+
+        handle_input(width as usize, &mut grid, &mut ship);
+
+        if current_state_of_object(&mut grid, ship.x, ship.y) == 1 {
+            ship.health -= 50;
+            change_state(&mut grid, ship.x, ship.y, 0);
+        }
+
+        if ship.health > 0 {
+            draw_text(&ship.health.to_string(), width - 50.0, 20.0, 35.0, BLACK);
+        } else {
+            draw_text("Dead", width - 70.0, 20.0, 35.0, BLACK);
+        }
+        restore_health(&mut grid, &mut ship);
+        
+        draw_bullet(&mut grid, &mut ship, &mut bullets);
+        draw_text(&ship.ammo.to_string(), width - 50.0, 60.0, 35.0, BLACK);
+        
+        let elapsed_frame_time = last_frame_time.elapsed();
+        if elapsed_frame_time < TARGET_FRAME_TIME {std::thread::sleep(TARGET_FRAME_TIME - elapsed_frame_time)};
+
+        next_frame().await;
+    }
 }
