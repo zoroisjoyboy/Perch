@@ -9,6 +9,11 @@ const TARGET_FRAME_TIME: Duration = Duration::from_micros(1_000_000 / DESIRED_FP
 const CELL_SIZE: f32 = 20.;
 const PADDING: f32 = 2.;
 
+enum STATE {
+    Boost,
+    Health,
+}
+
 fn grid_to_window(grid_x: usize, grid_y: usize) -> (f32, f32) {
     let x = grid_x as f32 * (CELL_SIZE + PADDING) + PADDING;
     let y = grid_y as f32 * (CELL_SIZE + PADDING) + PADDING;
@@ -52,7 +57,19 @@ fn draw_ship(ship: &ship::Ship) {
     draw_rectangle(ship.x as f32, ship.y as f32, CELL_SIZE, CELL_SIZE, WHITE);
 } 
 
-fn draw_panel() {}
+fn draw_panel(grid: &grid::Grid, ship: &ship::Ship) {
+
+    let (width,_) = grid_to_window(grid.x, grid.y);
+
+    if ship.health > 0 {
+        draw_text(&ship.health.to_string(), width - 50.0, 20.0, 35.0, BLACK);
+    } else {
+        draw_text("Dead", width - 70.0, 20.0, 35.0, BLACK);
+    }
+    
+    draw_text(&ship.ammo.to_string(), width - 50.0, 60.0, 35.0, BLACK);
+
+}
 
 fn draw_bullet(grid: &mut grid::Grid, ship: &mut ship::Ship, bullets: &mut Vec<ship::Bullet>) {
     if is_key_down(KeyCode::Space) {
@@ -125,16 +142,10 @@ async fn main() {
             change_state(&mut grid, ship.x, ship.y, 0);
         }
 
-        if ship.health > 0 {
-            draw_text(&ship.health.to_string(), width - 50.0, 20.0, 35.0, BLACK);
-        } else {
-            draw_text("Dead", width - 70.0, 20.0, 35.0, BLACK);
-        }
+        draw_panel(&mut grid, &mut ship);
         restore_health(&mut grid, &mut ship);
-        
         draw_bullet(&mut grid, &mut ship, &mut bullets);
-        draw_text(&ship.ammo.to_string(), width - 50.0, 60.0, 35.0, BLACK);
-        
+
         let elapsed_frame_time = last_frame_time.elapsed();
         if elapsed_frame_time < TARGET_FRAME_TIME {std::thread::sleep(TARGET_FRAME_TIME - elapsed_frame_time)};
 
