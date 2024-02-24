@@ -1,7 +1,5 @@
-/* Main */
 use macroquad::prelude::*;
-use std::thread;
-use lib::{grid, ship::{self, Bullet}};
+use lib::{Grid, Ship, Bullet};
 use std::time::{Duration, Instant};
 
 const DESIRED_FPS: u64 = 60;
@@ -12,6 +10,11 @@ const PADDING: f32 = 2.;
 enum STATE {
     Boost,
     Health,
+}
+
+struct GameState {
+    screen_width: f32,
+    screen_height: f32,
 }
 
 fn grid_to_window(grid_x: usize, grid_y: usize) -> (f32, f32) {
@@ -26,18 +29,18 @@ fn window_to_grid(window_x: f32, window_y: f32) -> (usize, usize) {
     (grid_x, grid_y)
 }
 
-fn current_state_of_object(grid: &mut grid::Grid, x: usize, y: usize) -> i32 {
+fn current_state_of_object(grid: &mut Grid, x: usize, y: usize) -> i32 {
     let (grid_x, grid_y) = window_to_grid(x as f32, y as f32);
     let current_state = grid.grid[grid_y][grid_x];
     return current_state;
 }
 
-fn change_state(grid: &mut grid::Grid, x: usize, y: usize, new_state: i32) {
+fn change_state(grid: &mut Grid, x: usize, y: usize, new_state: i32) {
     let (grid_x, grid_y) = window_to_grid(x as f32, y as f32);
     grid.grid[grid_y][grid_x] = new_state;
 }
 
-fn draw_grid(grid: &grid::Grid) {
+fn draw_grid(grid: &Grid) {
     for (i, row) in grid.grid.iter().enumerate() {
         for (j, &value) in row.iter().enumerate() {
             let x = j as f32 * (CELL_SIZE + PADDING) + PADDING;
@@ -53,11 +56,11 @@ fn draw_grid(grid: &grid::Grid) {
     }
 }
 
-fn draw_ship(ship: &ship::Ship) {
+fn draw_ship(ship: &Ship) {
     draw_rectangle(ship.x as f32, ship.y as f32, CELL_SIZE, CELL_SIZE, WHITE);
 } 
 
-fn draw_panel(grid: &grid::Grid, ship: &ship::Ship) {
+fn draw_panel(grid: &Grid, ship: &Ship) {
 
     let (width,_) = grid_to_window(grid.x, grid.y);
 
@@ -71,10 +74,10 @@ fn draw_panel(grid: &grid::Grid, ship: &ship::Ship) {
 
 }
 
-fn draw_bullet(grid: &mut grid::Grid, ship: &mut ship::Ship, bullets: &mut Vec<ship::Bullet>) {
+fn draw_bullet(grid: &mut Grid, ship: &mut Ship, bullets: &mut Vec<Bullet>) {
     if is_key_down(KeyCode::Space) {
         ship.shoot();
-        let new_bullet = ship::Bullet::new (
+        let new_bullet = Bullet::new (
             ship.x as f32 + CELL_SIZE / 2.0,
             ship.y as f32,
             (CELL_SIZE + PADDING) + 2.0,
@@ -94,7 +97,7 @@ fn draw_bullet(grid: &mut grid::Grid, ship: &mut ship::Ship, bullets: &mut Vec<s
     bullets.retain(|bullet| bullet.y >= 0.0 && !bullet.collided);
 }
 
-fn restore_health(grid: &mut grid::Grid, ship: &mut ship::Ship) {
+fn restore_health(grid: &mut Grid, ship: &mut Ship) {
     if current_state_of_object(grid, ship.x, ship.y) == 3 {
         ship.health += 10; 
         if ship.health > 90 {
@@ -103,15 +106,21 @@ fn restore_health(grid: &mut grid::Grid, ship: &mut ship::Ship) {
     }
 
 }
-fn handle_input(width: usize, grid: &mut grid::Grid, ship: &mut ship::Ship) {
+fn handle_input(width: usize, grid: &mut Grid, ship: &mut Ship) {
     ship.left_move(CELL_SIZE as usize, PADDING as usize);
     ship.right_move(width, CELL_SIZE as usize, PADDING as usize);
 }
 #[macroquad::main("Perch")]
 async fn main() {
-    let mut grid = grid::Grid::new(60, 30);
+
+    let mut game_state = GameState {
+        screen_width: screen_width(),
+        screen_height: screen_height(),
+    };
+
+    let mut grid = Grid::new(60, 30);
     let (width, height) = grid_to_window(grid.x, grid.y);
-    let mut ship = ship::Ship::new(((width / 2.0 - CELL_SIZE) - PADDING + 1.0) as usize, ((height - CELL_SIZE) - PADDING) as usize);
+    let mut ship = Ship::new(((width / 2.0 - CELL_SIZE) - PADDING + 1.0) as usize, ((height - CELL_SIZE) - PADDING) as usize);
     let mut bullets = Vec::new();
 
     grid.display_grid();
@@ -122,9 +131,20 @@ async fn main() {
     let mut last_frame_time = Instant::now();
 
     loop {
-
         let delta_time = last_frame_time.elapsed();
         last_frame_time = Instant::now();
+
+        if screen_width() != game_state.screen_width || screen_height() != game_state.screen_height {
+            game_state.screen_width = screen_width();
+            game_state.screen_height = screen_height();
+        }
+
+        if is_mouse_button_down(MouseButton::Left) {
+            // Adjust the screen size based on mouse position
+            let mouse_pos = mouse_position();
+            game_state.screen_width = mouse_pos.0;
+            game_state.screen_height = mouse_pos.1;
+        }
 
         clear_background(BEIGE);
         request_new_screen_size(width, height);
