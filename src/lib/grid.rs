@@ -5,6 +5,7 @@ use ::rand::thread_rng;
 use std::collections::HashMap;
 use std::{collections::HashSet, vec};
 
+
 #[derive(Debug)]
 pub struct Grid {
     pub x: usize,
