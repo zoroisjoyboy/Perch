@@ -1,6 +1,7 @@
 use macroquad::prelude::*;
 use lib::{Grid, Ship, Bullet};
-use std::time::{Duration, Instant};
+use std::{collections::HashSet, time::{Duration, Instant}};
+use nalgebra::{Matrix, Dynamic};
 
 const DESIRED_FPS: u64 = 60;
 const TARGET_FRAME_TIME: Duration = Duration::from_micros(1_000_000 / DESIRED_FPS);
@@ -49,7 +50,6 @@ fn draw_grid(grid: &Grid) {
             match value {
                 1 => draw_rectangle(x, y, CELL_SIZE, CELL_SIZE, BLACK),
                 2 => draw_rectangle(x, y, CELL_SIZE, CELL_SIZE, BLUE),
-                3 => draw_rectangle(x, y, CELL_SIZE, CELL_SIZE, PINK),
                 _ => draw_rectangle(x, y, CELL_SIZE, CELL_SIZE, BEIGE),
             }
         }
@@ -62,7 +62,7 @@ fn draw_ship(ship: &Ship) {
 
 fn draw_panel(grid: &Grid, ship: &Ship) {
 
-    let (width,_) = grid_to_window(grid.x, grid.y);
+    let (width,_) = grid_to_window(grid.r, grid.c);
 
     if ship.health > 0 {
         draw_text(&ship.health.to_string(), width - 50.0, 20.0, 35.0, BLACK);
@@ -110,6 +110,7 @@ fn handle_input(width: usize, grid: &mut Grid, ship: &mut Ship) {
     ship.left_move(CELL_SIZE as usize, PADDING as usize);
     ship.right_move(width, CELL_SIZE as usize, PADDING as usize);
 }
+
 #[macroquad::main("Perch")]
 async fn main() {
 
@@ -118,14 +119,16 @@ async fn main() {
         screen_height: screen_height(),
     };
 
-    let mut grid = Grid::new(60, 30);
-    let (width, height) = grid_to_window(grid.x, grid.y);
+    let row = 30;
+    let col = 60;
+    let mut perm_grid = Grid::new(row, col);
+    let mut temp_grid = Grid::new(row, col);
+    let (width, height) = grid_to_window(perm_grid.c, perm_grid.r);
     let mut ship = Ship::new(((width / 2.0 - CELL_SIZE) - PADDING + 1.0) as usize, ((height - CELL_SIZE) - PADDING) as usize);
     let mut bullets = Vec::new();
-
-    grid.display_grid();
-    if current_state_of_object(&mut grid, ship.x, ship.y) == 1 {
-        change_state(&mut grid, ship.x, ship.y, 0);
+    perm_grid.create_grid();
+    if current_state_of_object(&mut perm_grid, ship.x, ship.y) == 1 {
+        change_state(&mut perm_grid, ship.x, ship.y, 0);
     }
 
     let mut last_frame_time = Instant::now();
@@ -149,22 +152,26 @@ async fn main() {
         clear_background(BEIGE);
         request_new_screen_size(width, height);
 
-        draw_grid(&grid);
+        draw_grid(&perm_grid);
         
         draw_ship(&ship); 
+        
+        perm_grid.update_grid(temp_grid.grid.clone());
 
-        grid.regenerate_top_row();
-
-        handle_input(width as usize, &mut grid, &mut ship);
-
-        if current_state_of_object(&mut grid, ship.x, ship.y) == 1 {
-            ship.health -= 50;
-            change_state(&mut grid, ship.x, ship.y, 0);
+        if temp_grid.grid.len() == 0 {
+            temp_grid.create_grid();
         }
 
-        draw_panel(&mut grid, &mut ship);
-        restore_health(&mut grid, &mut ship);
-        draw_bullet(&mut grid, &mut ship, &mut bullets);
+        handle_input(width as usize, &mut perm_grid, &mut ship);
+
+        if current_state_of_object(&mut perm_grid, ship.x, ship.y) == 1 {
+            ship.health -= 50;
+            change_state(&mut perm_grid, ship.x, ship.y, 0);
+        }
+
+        draw_panel(&mut perm_grid, &mut ship);
+        restore_health(&mut perm_grid, &mut ship);
+        draw_bullet(&mut perm_grid, &mut ship, &mut bullets);
 
         let elapsed_frame_time = last_frame_time.elapsed();
         if elapsed_frame_time < TARGET_FRAME_TIME {std::thread::sleep(TARGET_FRAME_TIME - elapsed_frame_time)};

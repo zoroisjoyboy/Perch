@@ -1,142 +1,155 @@
+use core::num;
+use std::{collections::HashSet, hash::Hash, vec};
+use macroquad::rand::gen_range;
+use rand::{thread_rng, Rng};
+use rand::seq::SliceRandom;
 
-use macroquad::prelude::*;
-use ::rand::Rng;
-use ::rand::thread_rng;
-use std::collections::HashMap;
-use std::{collections::HashSet, vec};
+const OBS_CELL_QUANT: f32 = 100.0;
+const OBS_NUM: f32 = 10.0;
+const MYST_CELL_QUANT: f32 = 18.0;
+const MYST_NUM: f32 = 2.0;
+const MIN_SEP: usize = 2.0 as usize;
 
+#[derive(Debug)]
+pub enum GridState {
+    Empty(i32),
+    Obstacle(i32),
+    Mystery(i32),
+}
 
 #[derive(Debug)]
 pub struct Grid {
-    pub x: usize,
-    pub y: usize,
+    pub r: usize,
+    pub c: usize,
     pub grid: Vec<Vec<i32>>, 
-    obstacle_row: Vec<bool>,
-    boost_row: Vec<bool>,
-    heal_row: Vec<bool>,
-    obstacle_gen: f64,
-    boost_gen: f64,
-    heal_gen: f64,
+    myst_matrix: Vec<Vec<i32>>, 
+    obs_matrix: Vec<Vec<i32>>,
 }
 
 impl Grid {
 
-    pub fn new(x: usize, y: usize) -> Self {
+    pub fn new(row: usize, col: usize) -> Self {
         Grid {
-            x,
-            y,
-            grid: vec![vec![0; x]; y], 
-            obstacle_row: vec![false; x],
-            boost_row: vec![false; x], 
-            heal_row: vec![false; x],
-            obstacle_gen: 0.02,
-            boost_gen: 0.02,
-            heal_gen: 0.02,
-        }
-    }
-    
-    pub fn display_grid(&mut self) {
-        for i in 0..self.grid.len() {
-            for (&index, value) in &self.generate_row() {
-                self.grid[i][index] = *value;
-            }
+            r: row,
+            c: col,
+            grid: vec![vec![0; col]; row],
+            myst_matrix: vec![vec![0; col]; row],
+            obs_matrix: vec![vec![0; col]; row],
         }
     }
 
-    pub fn regenerate_top_row(&mut self) {
-        let new_chunk_elements = self.generate_row();
-        let mut new_top_row: Vec<i32> = vec![0; self.x + 1];
-            
-        for (&index, value) in &new_chunk_elements {
-            new_top_row[index] = *value; 
+    pub fn create_grid(&mut self) {
+        self.gen_obs_matrix();
+        self.gen_myst_matrix();
+    }
+
+    pub fn update_grid(&mut self, mut temp_grid: Vec<Vec<i32>>) {
+        if let Some(new_row) = temp_grid.pop() {
+            self.grid.insert(0, new_row);
+        } else {
+            panic!("Empty temp_grid!\n");
         }
-        self.grid.insert(0, new_top_row);
         self.grid.pop();
     }
 
-    fn generate_obstacles_row(&mut self) {
-        let row = &mut self.obstacle_row; 
-        let chunk_generated = rand_chunk_generate(row, self.obstacle_gen); 
-        for i in 0..row.len() {
-            if chunk_generated.contains(&i) {
-                row[i] = true;
+    fn gen_rand_coords(&mut self, num_pairs: usize, min_seperation: usize) -> HashSet<(usize, usize)> {
+        let mut rng = rand::thread_rng();
+        let mut used_coordinates = HashSet::new();
+        let mut count_pairs: i32 = 0;
+        let mut attempt_count = 0;
+        let mut is_far_enough: bool = false;
+
+        while (count_pairs as usize) < num_pairs {
+            let mut r = rng.gen_range(0..self.r);
+            let mut c = rng.gen_range(0..self.c);
+
+            while !is_far_enough {
+            
+                is_far_enough = used_coordinates.iter().all(|&(x, y)| {
+                    (r as isize - x as isize).abs() >= min_seperation as isize * MIN_SEP as isize
+                        && (c as isize - y as isize).abs() >= min_seperation as isize * MIN_SEP as isize
+                });
+                
+                r = rng.gen_range(0..self.r);
+                c = rng.gen_range(0..self.c);
+
             }
-        }
-    }
 
-    fn generate_boosts_row(&mut self) {
-        let row = &mut self.boost_row;
-        let chunk_generated = rand_chunk_generate(row, self.boost_gen);  
-        for i in 0..row.len() {
-            if chunk_generated.contains(&i) {
-                if self.obstacle_row[i] {
-                    let mut pos_ref = i;
-                    while self.obstacle_row[pos_ref] || pos_ref == i {
-                        pos_ref = thread_rng().gen_range(0..row.len());
-                    }
-                    row[pos_ref] = true;
-                } else {
-                    row[i] = true;
-                }
-            }
+            used_coordinates.insert((r, c));
+            count_pairs += 1;
         }
-    }       
-
-    fn generate_heals_row(&mut self) {
-        let row: &mut Vec<bool> = &mut self.heal_row;
-        let chunk_generated = rand_chunk_generate(row, self.heal_gen);
-        for i in 0..row.len() {
-            if chunk_generated.contains(&i) {
-                if self.obstacle_row[i] || self.boost_row[i] {
-                    let mut pos_ref = i;
-                    while self.obstacle_row[pos_ref] || self.boost_row[pos_ref] || pos_ref == i {
-                        pos_ref = thread_rng().gen_range(0..row.len());
-                    }
-                    row[pos_ref] = true;
-                } else {
-                    row[i] = true;
-                }
-            } 
-        }
-    }
-
-    fn generate_row(&mut self) -> HashMap<usize, i32> {
-        self.generate_obstacles_row();
-        self.generate_boosts_row();
-        self.generate_heals_row();
         
-        let mut generated_row: HashMap<usize, i32> = HashMap::new();
-        let n: usize = self.obstacle_row.len();
-        for i in 0..n {
-            if self.obstacle_row[i] {
-                generated_row.insert(i, 1);
-            } else if self.boost_row[i] {
-                generated_row.insert(i, 2);
-            } else if self.heal_row[i] {
-                generated_row.insert(i,3);
-            } else {
-                generated_row.insert(i, 0);
+        used_coordinates
+    }
+
+    fn fill_adjacent_cells(&mut self, env: i32, r: usize, c: usize, mut cells_to_fill: f32) { 
+        let mut rng = rand::thread_rng();
+        self.grid[r][c] = env; // replace type, cannot just be 1 as it's being used by both obs and myst 
+        let moves: Vec<(i32, i32)> = vec![(0, -1), (0, 1), (-1, 0), (1, 0)];
+
+        let mut moves = moves.clone();
+        moves.shuffle(&mut thread_rng());
+        
+        for (dr, dc) in moves {
+            let new_r = r.wrapping_add(dr as usize);
+            let new_c = c.wrapping_add(dc as usize);
+
+            cells_to_fill -= 1.0;
+
+            if new_r < self.r && new_c < self.c && cells_to_fill > 0.0 {
+                if self.grid[new_r][new_c] == 0 {
+                    self.fill_adjacent_cells(env, new_r, new_c, cells_to_fill - 1.0);
+                    
+                }
             }
         }
-
-        self.clear_rows();
-        return generated_row;
     }
 
-    fn clear_rows(&mut self) {
-        self.obstacle_row = vec![false; self.x as usize];
-        self.boost_row = vec![false; self.x as usize];
-        self.heal_row = vec![false; self.x as usize];
+    fn gen_obs_matrix(&mut self) {
+        let ratio: f32 = OBS_CELL_QUANT / (self.c * self.r) as f32;
+        let cells_per_block: f32 = OBS_CELL_QUANT / OBS_NUM;
+        let mut current_ratio: f32 = 0.0;      
+        let mut count = 0;
+        let obs_coordinates: HashSet<(usize, usize)> = self.gen_rand_coords(OBS_NUM as usize,  OBS_CELL_QUANT as usize / OBS_NUM as usize);
+        
+        while current_ratio < ratio || count < OBS_NUM as i32 {
+            for i in 0..self.r {
+                for j in 0..self.c {
+                    let current_coords = (i, j);
+                    let obs_coord_set: HashSet<(usize, usize)> = obs_coordinates.iter().cloned().collect();
+                    if obs_coord_set.contains(&current_coords) {
+                        let cells_to_fill = rand::thread_rng().gen_range(cells_per_block / 2.0..cells_per_block);
+                        self.fill_adjacent_cells(1, i, j, cells_to_fill);                           
+                        current_ratio += cells_to_fill / (self.c * self.r) as f32;
+                        count += 1; 
+                    }
+                }        
+            }
+        }
+                
     }
+
+    fn gen_myst_matrix(&mut self) { 
+        let cells_per_block: f32 = MYST_CELL_QUANT / MYST_NUM; 
+        let mut count = 0;
+        let myst_coordinates: HashSet<(usize, usize)> = self.gen_rand_coords(MYST_NUM as usize, MYST_CELL_QUANT as usize / MYST_NUM as usize);
+        while count < MYST_NUM as i32 { 
+            for i in 0..self.r {
+                for j in 0..self.c {
+                    let current_coords = (i, j);
+                    let myst_coord_set: HashSet<(usize, usize)> = myst_coordinates.iter().cloned().collect();
+                    if myst_coord_set.contains(&current_coords) {
+                        self.fill_adjacent_cells(2, i, j, cells_per_block); // should not overlap with obs
+                        count += 1; 
+                    }
+                }
+            }
+        }
+    }
+
+    fn myst_gen_rand_asset(&mut self) {} // generate random assets when user touches myst block 
+    
 
 }
 
-fn rand_chunk_generate(row: &mut Vec<bool>, gen_perc: f64) -> HashSet<usize> {
-    let num_items = (row.len() as f64 * gen_perc).round() as i32; 
-    let mut items_hashset = HashSet::new();
-    while (items_hashset.len() as i32) < num_items {
-        let items_pos = thread_rng().gen_range(0..row.len());
-        items_hashset.insert(items_pos);
-    }
-    items_hashset
-}
+
