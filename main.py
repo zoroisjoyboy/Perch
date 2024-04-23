@@ -34,9 +34,8 @@ if __name__ == "__main__":
                     case 2:
                         pygame.draw.rect(screen, "green", (x, y, CELL_SIZE, CELL_SIZE))
         
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_UP]:
-            g.update()
+        # keys = pygame.key.get_pressed()
+        g.update()
             
         pygame.display.flip()
         clock.tick(60)

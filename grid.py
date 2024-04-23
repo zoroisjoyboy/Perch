@@ -48,26 +48,17 @@ class Grid:
         self._gen_obs(self._bggrid, obs_coords)
         self._gen_myst(self._bggrid, myst_coords)
 
-    def _rand_coords(self, n_pairs: int, min_sep) -> list: 
+    def _rand_coords(self, n_pairs: int, min_sep: int) -> list: 
         rng = np.random.default_rng()
         used_coordinates = []
         count_pairs = 0
         
         while count_pairs < n_pairs:
             rand_coordate = (rng.integers(0, self._r), rng.integers(0, self._c))
-            if len(used_coordinates) > 1:
-                i = 1
-                ti = 10
-                while i <= len(used_coordinates):
-                        if (abs(used_coordinates[i-1][0] - rand_coordate[0]) < min_sep) or abs(used_coordinates[i-1][1] - rand_coordate[1] < min_sep): # min sep based off size of row and col
-                            if ti < 1:
-                                break
-                            rand_coordate = (rng.integers(0, self._r), rng.integers(0, self._c))
-                            ti -= 1
-                            i = 0
-                        i += 1                    
-            used_coordinates = list(set(used_coordinates).union({rand_coordate}))
-            count_pairs += 1
+
+            if all(np.linalg.norm(np.array(used_coord) - np.array(rand_coordate)) >= min_sep for used_coord in used_coordinates):
+                used_coordinates.append(rand_coordate)
+                count_pairs += 1
         
         return used_coordinates
 
@@ -80,13 +71,21 @@ class Grid:
 
         while generated_cells < num_cells:
             rng.shuffle(moves)
-            new_r += moves[0][0]
-            new_c += moves[0][1]
+            cell_found = False
 
-            if 0 <= new_r < self._r and 0 <= new_c < self._c and grid[new_r][new_c] == 0:
-                grid[new_r][new_c] = env
-                generated_cells += 1
+            for move in moves:
+                new_r += move[0]
+                new_c += move[1]
 
+                if 0 <= new_r < self._r and 0 <= new_c < self._c and grid[new_r][new_c] == 0:
+                    grid[new_r][new_c] = env
+                    generated_cells += 1
+                    cell_found = True
+                    break
+            
+            if not cell_found:
+                break
+            
     def _gen_obs(self, grid, coords) -> None: 
         cells_per_block = OBS_CELL_QUANT / OBS_NUM
         
@@ -103,7 +102,7 @@ class Grid:
         # check if each row in obs has 4 slot 0's for ship to go through, if a row doesn't, regenerate obs matrix in self.obs_grid 
         return True
 
-    def _is_empty(self, gird) -> bool:
-        return len(gird) < 1
+    def _is_empty(self, grid) -> bool:
+        return len(grid) < 1
     
     
